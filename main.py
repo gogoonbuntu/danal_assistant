@@ -54,20 +54,29 @@ def open_window():
     font = tk.font.Font(family="맑은 고딕", size=16)
 
     
-    lb = tk.Label(w, text="Hello Danal")
+    lb = tk.Label(w, text="Hello Danal", height=5)
     lb.config(fg=ftc, bg=bgc, font=font)
     lb.pack()
 
-    c1 = tk.Checkbutton(w, text="Mail 자동응답", variable=auto_mail)
-    c2 = tk.Checkbutton(w, text="스트레칭 알람", variable=stretch)
+    c1 = tk.Checkbutton(w, text="Mail 자동응답", variable=auto_mail, bg=bgc, fg=ftc)
+    c2 = tk.Checkbutton(w, text="스트레칭 알람", variable=stretch, bg=bgc, fg=ftc)
     c1.pack()
     c2.pack()
+
+    space = tk.Label(w, height=2, bg=bgc)
+    space.pack()
     
     
-    bt = tk.Button(w, width=80, height=30, fg='black', bg='yellow', text='bye', command=byebye)
+    bt = tk.Button(w, width=10, height=1, fg='black', bg='yellow', text='bye', command=byebye)
     bt.pack()
     
+    #w.after(500, lambda: w.focus_force())
+
+    w.wm_attributes("-topmost",1)
+    w.focus_force()
+    
     w.mainloop()
+    
 
 def byebye():
     myicon.stop()
@@ -77,5 +86,6 @@ def init():
     t1 = Thread( target = myicon.run )
     t1.start()
 
-init()
+
 open_window()
+init()

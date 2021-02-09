@@ -2,35 +2,33 @@ import re, io
 import win32com.client as win32
 from win32com.client import Dispatch
 import inspect
+from pythoncom import CoInitialize, CoUninitialize
+from win10toast import ToastNotifier
 
-olook = win32.gencache.EnsureDispatch('Outlook.Application')
-mapi = olook.GetNamespace("MAPI")
 
-def display_folder(parent=mapi, level=-1):
-    level += 1
-    if hasattr(parent, 'Name'):
-        print ("\t" * (level) + parent.Name)
+def df(keywords):
+    CoInitialize()
+    count = 0
+    print('키워드 : ',list(keywords))
+    outlook = win32.Dispatch("Outlook.Application").GetNamespace("MAPI")
+    # 5 : 내가 보낸 메일
+    # 6 : 내가 받은 메일
+    inbox = outlook.GetDefaultFolder("6")
 
-    if hasattr(parent, 'Items'):
-        
-        for item in parent.Items:
-            if hasattr(item, 'SentOnBehalfOfName'):
-                print ("\t" * (level+1) + u"보낸사람 : " + item.SentOnBehalfOfName)
+    allBox = list(filter(lambda x: x.UnRead==True, inbox.Items))
+    # 몇 통의 메일이 있는지 확인
+    print ('총 ',len(allBox),' 통의 이메일')
 
-            if hasattr(item, 'Recipients'):
-                recipients = ', '.join([recipent.Name for recipent in item.Recipients])
-                print ("\t" * (level+1) + u"받는사람 : " + recipients)
-
-            if hasattr(item, 'To'):
-                print ("\t" * (level+1) + u"To : " + item.To)
-
-            print ("\t" * (level+1) + u"제목 : " + item.Subject + '\n')
-            print ("\t" * (level+1) + u"내용 : " + item.HTMLBody + '\n')
-            with open('a.txt','a', -1, 'utf-8') as k :
-                k.write("\t" * (level+1) + u"내용 : " + item.Body + '\n')
-
-    if hasattr(parent, 'Folders'):
-        for folder in parent.Folders:
-            display_folder(folder, level)
-
-#display_folder()
+    for msg in allBox:
+    # msg.Subject : 메일 제목
+    # SenderName : 보낸 사람 이름
+    # SenderEmailAddress : 보낸 사람 이메일
+        print(msg)
+        for a in keywords:
+            if a in msg.Subject:
+                count+=1
+    CoUninitialize()
+    print('검색 끝.')
+    ts = ToastNotifier()
+    ts.show_toast('Hello Danal', '총'+str(count)+'개의 안읽은 키워드 메일', icon_path='image.ico', duration=10, threaded=True)
+    return 

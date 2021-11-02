@@ -10,9 +10,8 @@ import Outlook as ol
 from selenium import webdriver as wd
 
 
-############################ PYSTRAY
 
-img = Image.open('image.jpg')
+############################ Initial
 
 w = tk.Tk()
 
@@ -27,8 +26,11 @@ ftc = '#efdab9'
 
 ts = ToastNotifier()
 
+
+
+kwFileName = 'kw.html'
 keywords = set()
-with open('kw.txt', encoding='UTF8') as kw:
+with open(kwFileName, encoding='euc-kr') as kw:
     for line in kw :
         keywords.add(line[0:-1])
 print(keywords)
@@ -41,46 +43,20 @@ def cc():
     print('strop:', stretch_option)
 
 
-myicon = icon('test', img,
-              menu=menu(
-#                    item(
-#                        'With submenu',
-#                        menu(
-#                            item(
-#                                'Show message',
-#                                lambda icon, item: icon.notify('키워드 알림입니다.')
-#                                ),
-#                            item(
-#                                'Submenu item 2',
-#                                lambda icon, item: icon.remove_notification()
-#                                )
-#                            )
-#                        ),
-                    item(
-                        'Settings',
-                        lambda icon, item: open_window()
-                        ),
-                    item(
-                        'Quit',
-                        lambda icon, item: byebye()
-                        )
-                    )
-                )
-
 def login_on():
     options = wd.ChromeOptions()
     options.add_argument('headless')
     options.add_argument('window-size=1920x1080')
     options.add_argument("disable-gpu")
-
-    driver = wd.Chrome('chromedriver', chrome_options=options)
+ 
+    driver = wd.Chrome('.\chromedriver', chrome_options=options)
     driver.get('http://naver.com')
     driver.implicitly_wait(3)
     driver.get_screenshot_as_file('naver_main_headless.png')
     
     driver.quit()
     
-login_on()
+#login_on()
 
 def kw_on():
     global keywords
@@ -109,6 +85,36 @@ def stretch_on(second=60):
         ts.show_toast('스트레칭', '합시다~', icon_path='image.ico', duration=10, threaded=True)
     if stretch_option>0 :
         Timer(second, stretch_on, [second]).start()
+
+############################ PYSTRAY
+
+img = Image.open('image.jpg')
+
+myicon = icon('test', img,
+              menu=menu(
+#                    item(
+#                        'With submenu',
+#                        menu(
+#                            item(
+#                                'Show message',
+#                                lambda icon, item: icon.notify('키워드 알림입니다.')
+#                                ),
+#                            item(
+#                                'Submenu item 2',
+#                                lambda icon, item: icon.remove_notification()
+#                                )
+#                            )
+#                        ),
+                    item(
+                        'Settings',
+                        lambda icon, item: open_window()
+                        ),
+                    item(
+                        'Quit',
+                        lambda icon, item: byebye()
+                        )
+                    )
+                )
 
 
 
@@ -173,16 +179,16 @@ def init():
 
 def keywordFunc():
     
-    global keywords, bgc, ftc
+    global keywords, bgc, ftc, kwFileName
     keywords= set()
-    with open('kw.txt', encoding='UTF8') as kw:
+    with open(kwFileName, encoding='UTF8') as kw:
         for line in kw :
             keywords.add(line[0:-1])
 
     def save_kw():
         item_s=list(keywords)
         sorted(item_s)
-        with open('kw.txt', 'w', encoding='UTF8') as kw:
+        with open(kwFileName, 'w', encoding='UTF8') as kw:
             for i in keywords :
                 kw.write(i)
                 kw.write('\n')
@@ -193,7 +199,7 @@ def keywordFunc():
             return
 
         value = listbox.get(selection[0])
-        items.remove(value)
+        keywords.remove(value)
         listbox.delete(selection[0])
         save_kw()
     
@@ -219,7 +225,7 @@ def keywordFunc():
     def add(event=None):
         new_kw = entry.get()
         if new_kw != '':
-            items.add(new_kw)
+            keywords.add(new_kw)
             if new_kw not in listbox.get(0,listbox.size()):
                 listbox.insert(listbox.size(), new_kw)
             else:
